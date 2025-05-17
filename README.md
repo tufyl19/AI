@@ -6,4 +6,4 @@ Hệ thống nhận diện và hiển thị giá tiền món ăn ở căn tin
 2. Hướng dẫn sử dụng:
    a. Giao diện sẽ hiện lên khung để bỏ ảnh vào, tải hình ảnh của khay cơm với các món đã chọn
    b. Sau khi upload ảnh, sẽ có nút để tiến hành nhận diện và đưa ra số tiền cần thanh toán
-3. Các phần phụ thuộc: Một số thư viện (Tensorflow, Matplotlib...), mang CNN, mô hình YOLOv8
+3. Các phần phụ thuộc: Một số thư viện (Tensorflow, Matplotlib...), mang CNN, mô hình YOLOv8, các phương pháp gán nhãn (Labelling, Roboflow)
