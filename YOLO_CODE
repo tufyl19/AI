@@ -1,0 +1,44 @@
+%pip install ultralytics
+
+from ultralytics import YOLO
+#Load model
+model = YOLO('yolov8n.pt')
+
+# Train
+model.train(
+    data='/kaggle/input/yaml-datafood/fooddd.yaml',
+    epochs=100,
+    imgsz=896,
+    batch=16,
+    patience=20,
+    workers=4,
+    device=0,
+    name='ieatfood',
+)
+metrics = model.val()
+print(metrics.box.map50)  # mAP@0.5
+results = model.val()
+print(f"mAP@0.5: {results.box.map50:.2f}")
+
+# Dự đoán ảnh
+results = model.predict(
+    source='the_test_img',
+    conf=0.1 , #(độ tin cậy)
+    save=True
+)
+from IPython.display import Image, display
+import os
+
+# Lấy đường dẫn ảnh đầu ra đã được YOLO xử lý
+output_image_path = os.path.join(results[0].save_dir, os.path.basename(results[0].path))
+
+# Hiển thị ảnh
+display(Image(filename=output_image_path))
+# In danh sách tọa độ các bounding boxes
+print("Bounding boxes (xyxy):", results[0].boxes.xyxy)
+
+# In tên lớp đã nhận diện
+print("Class IDs:", results[0].boxes.cls)
+
+# In độ tin cậy
+print("Confidences:", results[0].boxes.conf)
