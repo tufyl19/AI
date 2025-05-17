@@ -1,0 +1,118 @@
+!pip install gradio
+!pip install ultralytics
+import gradio as gr
+import cv2
+import numpy as np
+import tensorflow as tf
+import os
+from ultralytics import YOLO
+from collections import Counter
+
+# Kiểm tra sự tồn tại của mô hình
+if not os.path.exists("/content/yolov8n.pt") or not os.path.exists("/content/AITRAINBYLINH.tflite"):
+    raise FileNotFoundError("Không tìm thấy file mô hình YOLO hoặc TFLite!")
+
+# Load mô hình YOLOv8 và CNN (TensorFlow Lite)
+detector = YOLO("/content/yolov8n.pt")
+cnn_interpreter = tf.lite.Interpreter(model_path="/content/AITRAINBYLINH.tflite")
+cnn_interpreter.allocate_tensors()
+cnn_input = cnn_interpreter.get_input_details()
+cnn_output = cnn_interpreter.get_output_details()
+
+# Danh sách nhãn và bảng giá
+FOOD_LABELS = [
+    "Ca hu kho", "Canh cai", "Canh chua", "Com trang", "Dau hu sot ca",
+    "Ga chien", "Rau muong xao", "Thit kho", "Thit kho trung", "Trung chien"
+]
+
+PRICE_LIST = {
+    "Ca hu kho": 25000,
+    "Canh cai": 10000,
+    "Canh chua": 20000,
+    "Com trang": 5000,
+    "Dau hu sot ca": 20000,
+    "Ga chien": 25000,
+    "Rau muong xao": 10000,  # ĐÃ SỬA
+    "Thit kho": 30000,
+    "Thit kho trung": 30000,
+    "Trung chien": 10000,
+}
+
+def detect_and_classify(img):
+    try:
+        results = detector(img)[0]
+        if results.boxes is None or len(results.boxes) == 0:
+            return "Không nhận diện được món nào!", "0đ"
+
+        boxes = results.boxes.xyxy.cpu().numpy()
+        confs = results.boxes.conf.cpu().numpy()
+
+        h, w = img.shape[:2]
+        detected_dishes = []
+
+        for i, box in enumerate(boxes):
+            conf = confs[i]
+            if conf < 0.3:
+                continue
+            xmin, ymin, xmax, ymax = map(int, box)
+            xmin = max(0, xmin)
+            ymin = max(0, ymin)
+            xmax = min(w, xmax)
+            ymax = min(h, ymax)
+
+            crop_img = img[ymin:ymax, xmin:xmax]
+            if crop_img.size == 0:
+                continue
+
+            crop_resized = cv2.resize(crop_img, (180, 180))
+            input_arr = np.expand_dims(crop_resized.astype(np.float32) / 255.0, axis=0)
+
+            cnn_interpreter.set_tensor(cnn_input[0]['index'], input_arr)
+            cnn_interpreter.invoke()
+            preds = cnn_interpreter.get_tensor(cnn_output[0]['index'])
+
+            dish_idx = int(np.argmax(preds))
+            dish_name = FOOD_LABELS[dish_idx]
+            detected_dishes.append(dish_name)
+
+        if not detected_dishes:
+            return "Không nhận diện được món nào!", "0đ"
+
+        # Đếm số lượng mỗi món
+        dish_counter = Counter(detected_dishes)
+        detail_lines = []
+        total_cost = 0
+
+        for name, count in dish_counter.items():
+            price = PRICE_LIST.get(name, 0)
+            detail_lines.append(f"- {name} x{count}: {price * count:,}đ")
+            total_cost += price * count
+
+        summary = "\n".join(detail_lines)
+        return summary, f"{total_cost:,}đ"
+
+    except Exception as e:
+        return f"Lỗi trong quá trình xử lý: {str(e)}", "0đ"
+
+# Giao diện Gradio
+with gr.Blocks(theme=gr.themes.Soft()) as app:
+    with gr.Row():
+        with gr.Column(scale=3):
+            gr.Markdown(
+                """
+                <div style='text-align:left; font-size:2em; font-weight:bold; color:#20639B;'>
+                    HỆ THỐNG NHẬN DIỆN VÀ HIỂN THỊ GIÁ TIỀN MÓN ĂN Ở CĂN TIN
+                </div>
+                """,
+                elem_id="main-title"
+            )
+    with gr.Row():
+        inp_img = gr.Image(type="numpy", label="Ảnh khay cơm", interactive=True)
+        with gr.Column():
+            out_dishes = gr.Textbox(label="Món ăn & giá tiền", lines=8, interactive=False)
+            out_sum = gr.Textbox(label="Tổng tiền thanh toán", interactive=False)
+            run_btn = gr.Button("Nhận diện và tính tiền", elem_id="predict-btn")
+    run_btn.click(fn=detect_and_classify, inputs=inp_img, outputs=[out_dishes, out_sum])
+
+# Nếu dùng trong Colab thì bật share
+app.launch(share=True)
