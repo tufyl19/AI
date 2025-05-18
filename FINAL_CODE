@@ -1,15 +1,6 @@
-import tensorflow as tf
-# Load model
-model = tf.keras.models.load_model('/content/AITRAINBYLINH.h5')
-# Convert to TFLite
-converter = tf.lite.TFLiteConverter.from_keras_model(model)
-tflite_model = converter.convert()
-# Save the .tflite file
-with open('/content/AITRAINBYLINH.tflite', 'wb') as f:
-    f.write(tflite_model)
-
 !pip install gradio
 !pip install ultralytics
+
 import gradio as gr
 import cv2
 import numpy as np
@@ -18,34 +9,34 @@ import os
 from ultralytics import YOLO
 from collections import Counter
 
-# Kiểm tra sự tồn tại của mô hình
+#CHECK MODEL
 if not os.path.exists("/content/yolov8n.pt") or not os.path.exists("/content/AITRAINBYLINH.tflite"):
-    raise FileNotFoundError("Không tìm thấy file mô hình YOLO hoặc TFLite!")
+    raise FileNotFoundError("Không tìm thấy file mô hình!")
 
-# Load mô hình YOLOv8 và CNN (TensorFlow Lite)
+#LOAD MODEL YOLO AND CNN (TENSORFLOW LLITE)
 detector = YOLO("/content/yolov8n.pt")
 cnn_interpreter = tf.lite.Interpreter(model_path="/content/AITRAINBYLINH.tflite")
 cnn_interpreter.allocate_tensors()
 cnn_input = cnn_interpreter.get_input_details()
 cnn_output = cnn_interpreter.get_output_details()
 
-#Label and Price
+#LABEL AND 
 FOOD_LABELS = [
-    "Ca hu kho", "Canh cai", "Canh chua", "Com trang", "Dau hu sot ca",
-    "Ga chien", "Rau muong xao", "Thit kho", "Thit kho trung", "Trung chien"
+    "Ca_Hu_Kho", "Canh_Cai", "Canh_Chua", "Com_Trang", "Dau_Hu_Sot_Ca",
+    "Ga_Chien", "Rau_Muong_Xao", "Thit_Kho", "Thit_Kho_Trung", "Trung_Chien"
 ]
 
 PRICE_LIST = {
-    "Ca hu kho": 22000,
-    "Canh cai": 9000,
-    "Canh chua": 10000,
-    "Com trang": 5000,
-    "Dau hu sot ca": 16000,
-    "Ga chien": 25000,
-    "Rau muong xao": 8000,
-    "Thit kho": 17000,
-    "Thit kho trung": 18000,
-    "Trung chien": 12000,
+    "Ca_Hu_Kho": 22000,
+    "Canh_Cai": 9000,
+    "Canh_Chua": 10000,
+    "Com_Trang": 5000,
+    "Dau_Hu_Sot_Ca": 16000,
+    "Ga_Chien": 25000,
+    "Rau_Muong_Xao": 8000,
+    "Thit_Kho": 17000,
+    "Thit_Kho_Trung": 18000,
+    "Trung_Chien": 12000,
 }
 
 def detect_and_classify(img):
@@ -88,7 +79,7 @@ def detect_and_classify(img):
         if not detected_dishes:
             return "Không nhận diện được món nào!", "0đ"
 
-        # Đếm số lượng mỗi món
+        #COUNT
         dish_counter = Counter(detected_dishes)
         detail_lines = []
         total_cost = 0
@@ -104,7 +95,7 @@ def detect_and_classify(img):
     except Exception as e:
         return f"Lỗi trong quá trình xử lý: {str(e)}", "0đ"
 
-# Giao diện Gradio
+#GRADIO INTERFACE
 with gr.Blocks(theme=gr.themes.Soft()) as app:
     with gr.Row():
         with gr.Column(scale=3):
@@ -120,8 +111,8 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
         inp_img = gr.Image(type="numpy", label="Ảnh khay cơm", interactive=True)
         with gr.Column():
             out_dishes = gr.Textbox(label="Món ăn & giá tiền", lines=8, interactive=False)
-            out_sum = gr.Textbox(label="Tổng tiền thanh toán", interactive=False)
-            run_btn = gr.Button("Nhận diện và tính tiền", elem_id="predict-btn")
+            out_sum = gr.Textbox(label="Tổng tiền cần thanh toán", interactive=False)
+            run_btn = gr.Button("Submit", elem_id="predict-btn")
     run_btn.click(fn=detect_and_classify, inputs=inp_img, outputs=[out_dishes, out_sum])
 
 # Nếu dùng trong Colab thì bật share
