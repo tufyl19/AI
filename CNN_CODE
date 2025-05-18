@@ -7,7 +7,7 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 
-train_dir = "/kaggle/input/zizizizi/AI THINH_augmented"
+train_dir = "/content/drive/MyDrive/AI THINH_augmented"
 img_width, img_height = 180,180
 batch_size = 32
 Learning_rate = 0.0001
