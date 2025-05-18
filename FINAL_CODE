@@ -26,16 +26,16 @@ FOOD_LABELS = [
 ]
 
 PRICE_LIST = {
-    "Ca hu kho": 25000,
-    "Canh cai": 10000,
-    "Canh chua": 20000,
+    "Ca hu kho": 22000,
+    "Canh cai": 9000,
+    "Canh chua": 10000,
     "Com trang": 5000,
-    "Dau hu sot ca": 20000,
+    "Dau hu sot ca": 16000,
     "Ga chien": 25000,
-    "Rau muong xao": 10000,  # ĐÃ SỬA
-    "Thit kho": 30000,
-    "Thit kho trung": 30000,
-    "Trung chien": 10000,
+    "Rau muong xao": 8000,
+    "Thit kho": 17000,
+    "Thit kho trung": 18000,
+    "Trung chien": 12000,
 }
 
 def detect_and_classify(img):
