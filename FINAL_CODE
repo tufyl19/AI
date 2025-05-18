@@ -111,7 +111,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
         with gr.Column(scale=3):
             gr.Markdown(
                 """
-                <div style='text-align:left; font-size:2em; font-weight:bold; color:#20639B;'>
+                <div style='text-align:left; font-size:2em; font-weight:bold; color:#FF0000;'>
                     HỆ THỐNG NHẬN DIỆN VÀ HIỂN THỊ GIÁ TIỀN MÓN ĂN Ở CĂN TIN
                 </div>
                 """,
@@ -120,9 +120,9 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
     with gr.Row():
         inp_img = gr.Image(type="numpy", label="Ảnh khay cơm", interactive=True)
         with gr.Column():
+            run_btn = gr.Button("Submit", elem_id="predict-btn")
             out_dishes = gr.Textbox(label="Món ăn & giá tiền", lines=8, interactive=False)
             out_sum = gr.Textbox(label="Tổng tiền cần thanh toán", interactive=False)
-            run_btn = gr.Button("Submit", elem_id="predict-btn")
     run_btn.click(fn=detect_and_classify, inputs=inp_img, outputs=[out_dishes, out_sum])
 
 # Nếu dùng trong Colab thì bật share
