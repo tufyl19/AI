@@ -1,3 +1,13 @@
+import tensorflow as tf
+# Load model
+model = tf.keras.models.load_model('/content/AITRAINBYLINH.h5')
+# Convert to TFLite
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
+tflite_model = converter.convert()
+# Save the .tflite file
+with open('/content/AITRAINBYLINH.tflite', 'wb') as f:
+    f.write(tflite_model)
+
 !pip install gradio
 !pip install ultralytics
 import gradio as gr
@@ -19,7 +29,7 @@ cnn_interpreter.allocate_tensors()
 cnn_input = cnn_interpreter.get_input_details()
 cnn_output = cnn_interpreter.get_output_details()
 
-# Danh sách nhãn và bảng giá
+#Label and Price
 FOOD_LABELS = [
     "Ca hu kho", "Canh cai", "Canh chua", "Com trang", "Dau hu sot ca",
     "Ga chien", "Rau muong xao", "Thit kho", "Thit kho trung", "Trung chien"
