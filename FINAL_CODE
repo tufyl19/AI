@@ -21,7 +21,7 @@ from collections import Counter
 
 #CHECK MODEL
 if not os.path.exists(".pt") or not os.path.exists(".tflite"):
-    raise FileNotFoundError("Không tìm thấy file mô hình!")
+    raise FileNotFoundError("Hệ thống kkhông tìm thấy mô hình!")
 
 #LOAD MODEL YOLO AND CNN (TENSORFLOW LLITE)
 detector = YOLO(".pt")
@@ -53,7 +53,7 @@ def detect_and_classify(img):
     try:
         results = detector(img)[0]
         if results.boxes is None or len(results.boxes) == 0:
-            return "Không nhận diện được món nào!", "0đ"
+            return "Hệ thống không nhận diện được món ănăn!", "0đ"
 
         boxes = results.boxes.xyxy.cpu().numpy()
         confs = results.boxes.conf.cpu().numpy()
@@ -87,7 +87,7 @@ def detect_and_classify(img):
             detected_dishes.append(dish_name)
 
         if not detected_dishes:
-            return "Không nhận diện được món nào!", "0đ"
+            return "Hệ thống không nhận diện được món ănăn!", "0đ"
 
         #COUNT
         dish_counter = Counter(detected_dishes)
@@ -120,8 +120,8 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
     with gr.Row():
         inp_img = gr.Image(type="numpy", label="Ảnh khay cơm", interactive=True)
         with gr.Column():
-            run_btn = gr.Button("Submit", elem_id="predict-btn")
-            out_dishes = gr.Textbox(label="Món ăn & giá tiền", lines=8, interactive=False)
+            run_btn = gr.Button("Xử Lý", elem_id="predict-btn")
+            out_dishes = gr.Textbox(label="Món ăn bạn đã chọn", lines=8, interactive=False)
             out_sum = gr.Textbox(label="Tổng tiền cần thanh toán", interactive=False)
     run_btn.click(fn=detect_and_classify, inputs=inp_img, outputs=[out_dishes, out_sum])
 
