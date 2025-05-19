@@ -1,14 +1,24 @@
+import tensorflow as tf
+#lOAD MODEL
+model = tf.keras.models.load_model('/content/AITRAINBYLINH.h5')
+#CONVERT TO TFLTFLITE
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
+tflite_model = converter.convert()
+#SAVE THE .tflite FILE
+with open('/content/AITRAINBYLINH.tflite', 'wb') as f:
+    f.write(tflite_model)
+
 !pip install gradio
 !pip install ultralytics
 
 import tensorflow as tf
 #lOAD MODEL
-model = tf.keras.models.load_model('.h5')
+model = tf.keras.models.load_model('/content/AITRAINBYLINH.h5')
 #CONVERT TO TFLTFLITE
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 tflite_model = converter.convert()
 #SAVE THE .tflite FILE
-with open('.tflite', 'wb') as f:
+with open('/content/AITRAINBYLINH.tflite', 'wb') as f:
     f.write(tflite_model)
 
 import gradio as gr
@@ -20,12 +30,12 @@ from ultralytics import YOLO
 from collections import Counter
 
 #CHECK MODEL
-if not os.path.exists(".pt") or not os.path.exists(".tflite"):
+if not os.path.exists("/content/yolov8n.pt") or not os.path.exists("/content/AITRAINBYLINH.tflite"):
     raise FileNotFoundError("Hệ thống kkhông tìm thấy mô hình!")
 
 #LOAD MODEL YOLO AND CNN (TENSORFLOW LLITE)
-detector = YOLO(".pt")
-cnn_interpreter = tf.lite.Interpreter(model_path=".tflite")
+detector = YOLO("/content/yolov8n.pt")
+cnn_interpreter = tf.lite.Interpreter(model_path="/content/AITRAINBYLINH.tflite")
 cnn_interpreter.allocate_tensors()
 cnn_input = cnn_interpreter.get_input_details()
 cnn_output = cnn_interpreter.get_output_details()
@@ -53,7 +63,7 @@ def detect_and_classify(img):
     try:
         results = detector(img)[0]
         if results.boxes is None or len(results.boxes) == 0:
-            return "Hệ thống không nhận diện được món ănăn!", "0đ"
+            return "Hệ thống không nhận diện được món ăn!", "0đ"
 
         boxes = results.boxes.xyxy.cpu().numpy()
         confs = results.boxes.conf.cpu().numpy()
@@ -87,7 +97,7 @@ def detect_and_classify(img):
             detected_dishes.append(dish_name)
 
         if not detected_dishes:
-            return "Hệ thống không nhận diện được món ănăn!", "0đ"
+            return "Hệ thống không nhận diện được món ăn!", "0đ"
 
         #COUNT
         dish_counter = Counter(detected_dishes)
@@ -96,8 +106,8 @@ def detect_and_classify(img):
 
         for name, count in dish_counter.items():
             price = PRICE_LIST.get(name, 0)
-            detail_lines.append(f"- {name} x{count}: {price * count:,}đ")
-            total_cost += price * count
+            detail_lines.append(f"- {name}: {price:,}đ")
+            total_cost += price
 
         summary = "\n".join(detail_lines)
         return summary, f"{total_cost:,}đ"
@@ -125,5 +135,5 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
             out_sum = gr.Textbox(label="Tổng tiền cần thanh toán", interactive=False)
     run_btn.click(fn=detect_and_classify, inputs=inp_img, outputs=[out_dishes, out_sum])
 
-# Nếu dùng trong Colab thì bật share
+#Colab Share
 app.launch(share=True)
