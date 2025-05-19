@@ -1,11 +1,11 @@
 import tensorflow as tf
 #lOAD MODEL
-model = tf.keras.models.load_model('/content/AITRAINBYLINH.h5')
+model = tf.keras.models.load_model('.h5')
 #CONVERT TO TFLTFLITE
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 tflite_model = converter.convert()
 #SAVE THE .tflite FILE
-with open('/content/AITRAINBYLINH.tflite', 'wb') as f:
+with open('.tflite', 'wb') as f:
     f.write(tflite_model)
 
 !pip install gradio
@@ -13,12 +13,12 @@ with open('/content/AITRAINBYLINH.tflite', 'wb') as f:
 
 import tensorflow as tf
 #lOAD MODEL
-model = tf.keras.models.load_model('/content/AITRAINBYLINH.h5')
+model = tf.keras.models.load_model('.h5')
 #CONVERT TO TFLTFLITE
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 tflite_model = converter.convert()
 #SAVE THE .tflite FILE
-with open('/content/AITRAINBYLINH.tflite', 'wb') as f:
+with open('.tflite', 'wb') as f:
     f.write(tflite_model)
 
 import gradio as gr
@@ -30,12 +30,12 @@ from ultralytics import YOLO
 from collections import Counter
 
 #CHECK MODEL
-if not os.path.exists("/content/yolov8n.pt") or not os.path.exists("/content/AITRAINBYLINH.tflite"):
+if not os.path.exists(".pt") or not os.path.exists(".tflite"):
     raise FileNotFoundError("Hệ thống kkhông tìm thấy mô hình!")
 
 #LOAD MODEL YOLO AND CNN (TENSORFLOW LLITE)
-detector = YOLO("/content/yolov8n.pt")
-cnn_interpreter = tf.lite.Interpreter(model_path="/content/AITRAINBYLINH.tflite")
+detector = YOLO(".pt")
+cnn_interpreter = tf.lite.Interpreter(model_path=".tflite")
 cnn_interpreter.allocate_tensors()
 cnn_input = cnn_interpreter.get_input_details()
 cnn_output = cnn_interpreter.get_output_details()
